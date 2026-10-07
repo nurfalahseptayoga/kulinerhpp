@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kalkulator HPP Kuliner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F7F2;--surface:#FFFFFF;--ink:#1B2A27;--muted:#5E716C;--line:#DCE6DF;
+  --pandan:#1E6B52;--pandan-soft:#DDEFE6;--kunyit:#F2B134;--kunyit-soft:#FDF1D3;--cabai:#C8402F;--input:#F8FBF8;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1A17;--surface:#17251F;--ink:#E8F0EC;--muted:#98ABA5;--line:#2A3D36;
+  --pandan:#5CC79E;--pandan-soft:#1E3A2F;--kunyit:#F2B134;--kunyit-soft:#3A2F14;--cabai:#FF7A66;--input:#12201B;}}
+:root[data-theme="dark"]{
+  --bg:#0F1A17;--surface:#17251F;--ink:#E8F0EC;--muted:#98ABA5;--line:#2A3D36;
+  --pandan:#5CC79E;--pandan-soft:#1E3A2F;--kunyit:#F2B134;--kunyit-soft:#3A2F14;--cabai:#FF7A66;--input:#12201B;}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,sans-serif}
+h1,h2,.num{font-family:"Bricolage Grotesque",Figtree,system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 90px}
+header{display:flex;gap:16px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;margin-bottom:20px}
+header p{margin:4px 0 0;color:var(--muted);max-width:46ch}
+h1{margin:0;font-size:clamp(28px,5vw,42px);line-height:1.05;font-weight:800;letter-spacing:-.02em}
+.tools{display:flex;gap:8px}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;font-weight:500}
+button:hover{border-color:var(--pandan)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--kunyit);outline-offset:1px}
+button.primary{background:var(--pandan);border-color:var(--pandan);color:#fff}
+:root[data-theme="dark"] button.primary{color:#0F1A17}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.primary{color:#0F1A17}}
+.grid{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px}
+.card h2{margin:0 0 4px;font-size:20px;font-weight:700}
+.card .hint{margin:0 0 14px;color:var(--muted);font-size:14px}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;font-weight:500}
+input,select{width:100%;font:inherit;color:var(--ink);background:var(--input);border:1px solid var(--line);border-radius:10px;padding:9px 11px;min-width:0}
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.name-in{font-family:"Bricolage Grotesque",Figtree,sans-serif;font-size:22px;font-weight:700;padding:11px 14px}
+.item{display:grid;gap:8px;grid-template-columns:2fr 1.2fr 1fr .9fr 1fr 1.2fr auto;align-items:end;padding:12px 0;border-top:1px dashed var(--line)}
+.item.lain{grid-template-columns:2fr 1.2fr auto}
+.item:first-of-type{border-top:0}
+.cost{font-weight:600;padding:9px 0;text-align:right;white-space:nowrap}
+.del{padding:8px 10px;color:var(--cabai)}
+@media(max-width:640px){
+  .item{grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+  .item .full{grid-column:1/-1}
+  .item .cost{text-align:left}
+}
+.sub{display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--line);margin-top:6px;font-weight:600}
+aside{position:sticky;top:calc(12px + env(safe-area-inset-top,0px))}
+@media(max-width:860px){aside{position:static}}
+.tag{background:var(--surface);border:2px solid var(--ink);border-radius:18px;padding:22px 20px;position:relative}
+.tag::before{content:"";position:absolute;left:50%;top:-9px;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:var(--bg);border:2px solid var(--ink)}
+.tag small{color:var(--muted);font-size:13px}
+.big{font-size:clamp(34px,6vw,46px);font-weight:800;line-height:1.05;letter-spacing:-.02em;margin:2px 0 14px}
+.price{background:var(--kunyit-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.price .big{color:var(--ink);margin:0;font-size:32px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat{background:var(--pandan-soft);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-size:17px}
+.stat.warn{background:var(--kunyit-soft)}
+.mix{display:flex;gap:16px;align-items:center}
+.donut{width:104px;height:104px;border-radius:50%;flex:none;position:relative}
+.donut::after{content:"";position:absolute;inset:24px;background:var(--surface);border-radius:50%}
+.legend{font-size:13px;display:grid;gap:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+.legend b{font-weight:600}
+.msg{font-size:13px;color:var(--muted);margin:12px 0 0}
+.msg.bad{color:var(--cabai);font-weight:600}
+.bar{position:fixed;left:0;right:0;bottom:0;display:none;justify-content:space-around;background:var(--ink);color:var(--bg);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));font-size:13px;z-index:5}
+.bar b{display:block;font-size:17px}
+@media(max-width:860px){.bar{display:flex}}
+@media print{.tools,.del,.bar,button{display:none!important}body{background:#fff}aside{position:static}}
+@media (prefers-reduced-motion:no-preference){.big{transition:opacity .15s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Kalkulator HPP Kuliner</h1>
+      <p>Hitung harga pokok per porsi, tentukan harga jual, dan lihat apakah margin Anda aman.</p>
+    </div>
+    <div class="tools">
+      <button id="btnSample">Contoh data</button>
+      <button id="btnPrint">Cetak</button>
+      <button id="btnReset">Kosongkan</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <main>
+      <section class="card">
+        <h2>Produk</h2>
+        <p class="hint">Satu resep = satu kali produksi (batch).</p>
+        <label for="nama">Nama produk</label>
+        <input id="nama" class="name-in" placeholder="mis. Brownies kukus cokelat">
+        <div class="row2" style="margin-top:12px">
+          <div><label for="porsi">Hasil per batch (porsi/pcs)</label><input id="porsi" type="number" min="1" step="1" inputmode="numeric"></div>
+          <div><label for="susut">Susut bahan (%)</label><input id="susut" type="number" min="0" step="0.5" inputmode="decimal"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Bahan baku</h2>
+        <p class="hint">Isi harga beli dan jumlah yang dibeli, lalu jumlah yang dipakai di resep dengan satuan yang sama.</p>
+        <div id="bahan"></div>
+        <button id="addBahan" style="margin-top:6px">+ Tambah bahan</button>
+        <div class="sub"><span>Total bahan</span><span id="tBahan">Rp 0</span></div>
+      </section>
+
+      <section class="card">
+        <h2>Biaya lain per batch</h2>
+        <p class="hint">Tenaga kerja, gas, listrik, kemasan, ongkos kirim bahan, dan sejenisnya.</p>
+        <div id="lain"></div>
+        <button id="addLain" style="margin-top:6px">+ Tambah biaya</button>
+        <div class="sub"><span>Total biaya lain</span><span id="tLain">Rp 0</span></div>
+      </section>
+
+      <section class="card">
+        <h2>Target harga jual</h2>
+        <div class="row2">
+          <div><label for="margin">Margin laba yang diinginkan (%)</label><input id="margin" type="number" min="0" max="95" step="1" inputmode="decimal"></div>
+          <div><label for="bulat">Pembulatan harga</label>
+            <select id="bulat"><option value="0">Tanpa pembulatan</option><option value="500">Ke atas, kelipatan Rp 500</option><option value="1000">Ke atas, kelipatan Rp 1.000</option></select></div>
+          <div><label for="jual">Harga jual saat ini (opsional)</label><input id="jual" type="number" min="0" step="500" inputmode="numeric" placeholder="Rp"></div>
+        </div>
+      </section>
+    </main>
+
+    <aside>
+      <div class="tag" aria-live="polite">
+        <small>HPP per porsi</small>
+        <div class="big num" id="hpp">Rp 0</div>
+        <div class="price">
+          <small>Harga jual yang disarankan</small>
+          <div class="big num" id="harga">Rp 0</div>
+        </div>
+        <div class="stats">
+          <div class="stat"><small>Laba per porsi</small><b id="laba">Rp 0</b></div>
+          <div class="stat"><small>Food cost</small><b id="fc">0%</b></div>
+          <div class="stat"><small>Total biaya batch</small><b id="total">Rp 0</b></div>
+          <div class="stat"><small>Laba per batch</small><b id="labaB">Rp 0</b></div>
+        </div>
+        <div class="mix">
+          <div class="donut" id="donut" role="img" aria-label="Komposisi harga jual"></div>
+          <div class="legend" id="legend"></div>
+        </div>
+        <p class="msg" id="msg"></p>
+      </div>
+    </aside>
+  </div>
+</div>
+<div class="bar"><div>HPP/porsi<b id="b1">Rp 0</b></div><div>Harga jual<b id="b2">Rp 0</b></div></div>
+
+<script>
+(function(){
+  var KEY="hpp-kuliner-v1";
+  var S={nama:"",porsi:10,susut:5,margin:40,bulat:"500",jual:"",bahan:[],lain:[]};
+  var $=function(id){return document.getElementById(id)};
+  var rp=function(n){return "Rp "+Math.round(n||0).toLocaleString("id-ID")};
+  var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+  var num=function(v){var n=parseFloat(v);return isFinite(n)?n:0};
+
+  function load(){try{var r=localStorage.getItem(KEY);if(r){var d=JSON.parse(r);if(d&&d.bahan)S=d}}catch(e){}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+  var UNITS=["g","kg","ml","liter","butir","pcs","bungkus","sdm"];
+  function unitOpts(sel){return UNITS.map(function(u){return '<option'+(u===sel?' selected':'')+'>'+u+'</option>'}).join("")}
+  function bahanCost(b){return num(b.qBeli)>0?num(b.harga)/num(b.qBeli)*num(b.qPakai):0}
+
+  function renderBahan(){
+    $("bahan").innerHTML=S.bahan.map(function(b,i){
+      return '<div class="item" data-i="'+i+'">'+
+      '<div class="full"><label>Nama bahan</label><input data-k="nama" value="'+esc(b.nama)+'" placeholder="mis. Tepung terigu"></div>'+
+      '<div><label>Harga beli (Rp)</label><input data-k="harga" type="number" min="0" inputmode="numeric" value="'+esc(b.harga)+'"></div>'+
+      '<div><label>Jumlah dibeli</label><input data-k="qBeli" type="number" min="0" step="any" inputmode="decimal" value="'+esc(b.qBeli)+'"></div>'+
+      '<div><label>Satuan</label><select data-k="unit">'+unitOpts(b.unit)+'</select></div>'+
+      '<div><label>Dipakai</label><input data-k="qPakai" type="number" min="0" step="any" inputmode="decimal" value="'+esc(b.qPakai)+'"></div>'+
+      '<div class="cost" id="bc'+i+'">'+rp(bahanCost(b))+'</div>'+
+      '<button class="del" data-del="'+i+'" aria-label="Hapus bahan">Hapus</button></div>';
+    }).join("")||'<p class="hint">Belum ada bahan. Tambahkan bahan pertama Anda.</p>';
+  }
+  function renderLain(){
+    $("lain").innerHTML=S.lain.map(function(b,i){
+      return '<div class="item lain" data-i="'+i+'">'+
+      '<div><label>Nama biaya</label><input data-k="nama" value="'+esc(b.nama)+'" placeholder="mis. Gas"></div>'+
+      '<div><label>Nominal per batch (Rp)</label><input data-k="nominal" type="number" min="0" inputmode="numeric" value="'+esc(b.nominal)+'"></div>'+
+      '<button class="del" data-del="'+i+'" aria-label="Hapus biaya">Hapus</button></div>';
+    }).join("")||'<p class="hint">Belum ada biaya lain.</p>';
+  }
+
+  function calc(){
+    var porsi=Math.max(1,num(S.porsi)),susut=num(S.susut),m=Math.min(95,Math.max(0,num(S.margin)));
+    var bahan=0;S.bahan.forEach(function(b,i){var c=bahanCost(b);bahan+=c;var el=$("bc"+i);if(el)el.textContent=rp(c)});
+    bahan*=1+susut/100;
+    var lain=S.lain.reduce(function(a,b){return a+num(b.nominal)},0);
+    var total=bahan+lain,hpp=total/porsi;
+    var harga=hpp/(1-m/100),step=num(S.bulat);
+    if(step>0&&harga>0)harga=Math.ceil(harga/step)*step;
+    var laba=harga-hpp,fc=harga>0?bahan/porsi/harga*100:0;
+    $("tBahan").textContent=rp(bahan);$("tLain").textContent=rp(lain);
+    $("hpp").textContent=rp(hpp);$("harga").textContent=rp(harga);
+    $("laba").textContent=rp(laba);$("fc").textContent=fc.toFixed(1)+"%";
+    $("total").textContent=rp(total);$("labaB").textContent=rp(laba*porsi);
+    $("b1").textContent=rp(hpp);$("b2").textContent=rp(harga);
+    // komposisi harga jual
+    var pb=harga>0?bahan/porsi/harga*100:0,pl=harga>0?lain/porsi/harga*100:0,pf=Math.max(0,100-pb-pl);
+    $("donut").style.background=harga>0?"conic-gradient(#1E6B52 0 "+pb+"%,#F2B134 "+pb+"% "+(pb+pl)+"%,#8FD0B4 "+(pb+pl)+"% 100%)":"var(--line)";
+    $("legend").innerHTML='<div><i style="background:#1E6B52"></i>Bahan <b>'+pb.toFixed(0)+'%</b></div><div><i style="background:#F2B134"></i>Biaya lain <b>'+pl.toFixed(0)+'%</b></div><div><i style="background:#8FD0B4"></i>Laba <b>'+pf.toFixed(0)+'%</b></div>';
+    // pesan
+    var msg=$("msg"),jual=num(S.jual);msg.className="msg";
+    if(!total){msg.textContent="Isi bahan dan biaya untuk melihat hasil."}
+    else if(jual>0){
+      var lj=jual-hpp,mj=lj/jual*100;
+      if(lj<0){msg.className="msg bad";msg.textContent="Harga jual "+rp(jual)+" di bawah HPP. Anda rugi "+rp(-lj)+" per porsi."}
+      else{msg.textContent="Dengan harga jual "+rp(jual)+", laba "+rp(lj)+" per porsi (margin "+mj.toFixed(1)+"%)."+(mj<m?" Masih di bawah target "+m+"%.":" Target margin tercapai.")}
+    }else if(fc>40){msg.className="msg bad";msg.textContent="Food cost di atas 40%. Pertimbangkan menaikkan harga atau menekan biaya bahan."}
+    else{msg.textContent="Food cost "+fc.toFixed(0)+"% termasuk sehat untuk usaha kuliner (umumnya 30–40%)."}
+  }
+  function sync(){$("nama").value=S.nama;$("porsi").value=S.porsi;$("susut").value=S.susut;$("margin").value=S.margin;$("bulat").value=S.bulat;$("jual").value=S.jual}
+  function all(){sync();renderBahan();renderLain();calc();save()}
+
+  ["nama","porsi","susut","margin","bulat","jual"].forEach(function(id){
+    $(id).addEventListener("input",function(){S[id]=this.value;calc();save()});
+  });
+  function bind(box,list){
+    box.addEventListener("input",function(e){
+      var row=e.target.closest(".item"),k=e.target.getAttribute("data-k");if(!row||!k)return;
+      S[list][row.getAttribute("data-i")][k]=e.target.value;calc();save();
+    });
+    box.addEventListener("click",function(e){
+      var d=e.target.getAttribute("data-del");if(d===null)return;
+      S[list].splice(+d,1);all();
+    });
+  }
+  bind($("bahan"),"bahan");bind($("lain"),"lain");
+  $("addBahan").onclick=function(){S.bahan.push({nama:"",harga:"",qBeli:"",unit:"g",qPakai:""});all()};
+  $("addLain").onclick=function(){S.lain.push({nama:"",nominal:""});all()};
+  $("btnPrint").onclick=function(){window.print()};
+  $("btnReset").onclick=function(){S={nama:"",porsi:10,susut:5,margin:40,bulat:"500",jual:"",bahan:[{nama:"",harga:"",qBeli:"",unit:"g",qPakai:""}],lain:[{nama:"Tenaga kerja",nominal:""},{nama:"Gas / listrik",nominal:""},{nama:"Kemasan",nominal:""}]};all()};
+  $("btnSample").onclick=function(){
+    S={nama:"Brownies kukus cokelat",porsi:16,susut:5,margin:45,bulat:"500",jual:"",
+      bahan:[
+        {nama:"Tepung terigu",harga:13000,qBeli:1000,unit:"g",qPakai:150},
+        {nama:"Gula pasir",harga:17000,qBeli:1000,unit:"g",qPakai:200},
+        {nama:"Cokelat batang",harga:45000,qBeli:250,unit:"g",qPakai:200},
+        {nama:"Telur",harga:28000,qBeli:1000,unit:"g",qPakai:300},
+        {nama:"Mentega",harga:12000,qBeli:200,unit:"g",qPakai:150},
+        {nama:"Cokelat bubuk",harga:22000,qBeli:200,unit:"g",qPakai:30}],
+      lain:[{nama:"Tenaga kerja",nominal:25000},{nama:"Gas / listrik",nominal:6000},{nama:"Kemasan (16 box)",nominal:24000}]};
+    all();
+  };
+
+  load();
+  if(!S.bahan.length&&!S.lain.length&&!S.nama){$("btnSample").click()}else all();
+})();
+</script>
+</body>
+</html>
