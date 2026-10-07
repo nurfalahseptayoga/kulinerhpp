@@ -171,7 +171,7 @@ aside{position:sticky;top:calc(12px + env(safe-area-inset-top,0px))}
   function load(){try{var r=localStorage.getItem(KEY);if(r){var d=JSON.parse(r);if(d&&d.bahan)S=d}}catch(e){}}
   function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
-  var UNITS=["g","kg","ml","liter","butir","pcs","bungkus","sdm"];
+  var UNITS=["g","kg","ml","liter","butir","pcs","bungkus","sdm","sdt"];
   function unitOpts(sel){return UNITS.map(function(u){return '<option'+(u===sel?' selected':'')+'>'+u+'</option>'}).join("")}
   function bahanCost(b){return num(b.qBeli)>0?num(b.harga)/num(b.qBeli)*num(b.qPakai):0}
 
